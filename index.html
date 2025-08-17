@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🔥 Order Site🔥</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --brand:#ff6236; --bg:#f5f6f8; --card:#ffffff; --text:#111827; --muted:#6b7280; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text)}
+    .wrap{max-width:800px;margin:40px auto;padding:0 20px}
+    h1{font-size:32px;margin:0 0 20px; text-align:center}
+    h1 .emoji{margin-right:8px}
+    .card{background:var(--card); border-radius:16px; padding:22px; box-shadow:0 10px 30px rgba(17,24,39,.08); margin-bottom:22px}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    label{font-weight:600;margin-bottom:6px; display:block}
+    select,input,textarea,button{border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font:inherit}
+    select,input{height:42px}
+    textarea{min-height:84px; resize:vertical}
+    button{border:none; cursor:pointer; font-weight:700}
+    .btn{background:var(--brand); color:#fff; padding:10px 16px; border-radius:12px; box-shadow:0 6px 18px rgba(255,98,54,.25)}
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .btn.secondary{background:#111827}
+    .muted{color:var(--muted)}
+    .cart-list{list-style:none; margin:10px 0 0; padding:0}
+    .cart-item{display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #eef; border-radius:10px; margin-top:8px; background:#fafbff}
+    .cart-meta{font-size:12px; color:var(--muted)}
+    .rm{background:#ffe5e1; color:#c0392b; padding:6px 10px; border-radius:8px; font-weight:700}
+    .total{display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-weight:700}
+    .hidden{display:none}
+    .section-title{font-size:18px; font-weight:700; margin:0 0 12px}
+    /* 🔹 Sticky Go Back button */
+    #goBack {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      background:#111827;
+      color:#fff;
+      padding:10px 16px;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,.25);
+    }
+  </style>
+</head>
+<body>
+  <!-- 🔹 Always visible Go Back button -->
+  <button id="goBack">⬅️ Go Back</button>
+
+  <div class="wrap">
+    <h1><span class="emoji">🍽️</span>Order Your Food</h1>
+
+    <!-- Item picker card -->
+    <div class="card">
+      <div class="section-title">Choose Item</div>
+      <div class="row">
+        <div>
+          <label class="muted">Item</label>
+          <select id="itemSelect">
+            <option value="">--Select--</option>
+          </select>
+        </div>
+
+        <div id="qtyWrap" class="hidden">
+          <label class="muted">Qty</label>
+          <input id="qtyInput" type="number" min="1" value="1" style="width:100px;">
+        </div>
+
+        <div id="topWrap" class="hidden">
+          <label class="muted">Toppings</label>
+          <select id="toppingSelect"></select>
+        </div>
+
+        <div id="priceNow" class="muted" style="margin-top:28px"></div>
+
+        <div style="margin-top:28px">
+          <button id="addBtn" class="btn hidden">Add to Cart</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="section-title" style="display:flex;align-items:center;gap:8px">
+          <span>🛒 Cart</span>
+          <span id="cartCount" class="muted">(0 items)</span>
+        </div>
+        <ul id="cart" class="cart-list"></ul>
+        <div class="total">
+          <span>Total</span>
+          <span id="totalPrice">₹0</span>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:10px">
+          <button id="buyNow" class="btn secondary" disabled>Buy Now</button>
+          <button id="clearCart" class="rm hidden">Clear Cart</button>
+        </div>
+        <div id="cartHint" class="muted" style="margin-top:8px">Add items to the cart to enable Buy Now.</div>
+      </div>
+    </div>
+
+    <!-- Enter details card (hidden till Buy Now) -->
+    <div id="detailsCard" class="card hidden">
+      <div class="section-title">Enter Details</div>
+      <div class="row">
+        <div style="flex:1; min-width:220px">
+          <label>Your Name</label>
+          <input id="name" placeholder="Your Name">
+        </div>
+        <div style="flex:1; min-width:220px">
+          <label>Phone Number</label>
+          <input id="phone" placeholder="10-digit" type="text">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Address</label>
+        <textarea id="address" placeholder="House / Street / Area / City"></textarea>
+      </div>
+      <div style="margin-top:14px; display:flex; gap:10px; align-items:center">
+        <button id="submitOrder" class="btn">Submit Order ✅</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + App -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCf19aQAL6ceDLng7hVt0P7iUVHIi3Xzbk",
+      authDomain: "ffoa-27e74.firebaseapp.com",
+      projectId: "ffoa-27e74",
+      storageBucket: "ffoa-27e74.firebasestorage.app",
+      messagingSenderId: "369248201301",
+      appId: "1:369248201301:web:0d9dbbd9584ca7569002dc"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    await signInAnonymously(auth);
+
+    const MENU = [
+      { id:"pparatha", name:"Paneer Paratha", price:50, tops:[
+        {name:"None", add:0},{name:"Curd", add:15},{name:"Cheese", add:30},
+      ]},
+	  
+	  { id:"aparatha", name:"Aloo Paratha", price:50, tops:[
+        {name:"None", add:0},{name:"Curd", add:15},{name:"Cheese", add:30},
+      ]},
+	  
+      { id:"csandwich", name:"Cheese Sandwich", price:50, tops:[
+        {name:"None", add:0},{name:"Tomato", add:10},{name:"Olives", add:20},
+      ]},
+	  
+	  { id:"pcsandwich", name:"Paneer Cheese Sandwich", price:70, tops:[
+        {name:"None", add:0},{name:"Tomato", add:10},{name:"Olives", add:20},
+      ]},
+	  
+	  { id:"vegsandwich", name:"Vegetable Sandwich", price:45, tops:[
+        {name:"None", add:0},{name:"Tomato", add:10},{name:"Olives", add:20},
+      ]},
+      
+    ];
+
+    const itemSelect = document.getElementById('itemSelect');
+    const qtyWrap = document.getElementById('qtyWrap');
+    const qtyInput = document.getElementById('qtyInput');
+    const topWrap = document.getElementById('topWrap');
+    const toppingSelect = document.getElementById('toppingSelect');
+    const priceNow = document.getElementById('priceNow');
+    const addBtn = document.getElementById('addBtn');
+    const cartEl = document.getElementById('cart');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const buyNowBtn = document.getElementById('buyNow');
+    const clearCartBtn = document.getElementById('clearCart');
+    const cartCountEl = document.getElementById('cartCount');
+    const cartHint = document.getElementById('cartHint');
+    const detailsCard = document.getElementById('detailsCard');
+    const nameEl = document.getElementById('name');
+    const phoneEl = document.getElementById('phone');
+    const addressEl = document.getElementById('address');
+    const submitOrderBtn = document.getElementById('submitOrder');
+    const statusEl = document.getElementById('status');
+
+    itemSelect.innerHTML += MENU.map(m => `<option value="${m.id}">${m.name} — ₹${m.price}</option>`).join('');
+    let cart = [];
+
+    function updatePricePreview(){
+      const m = MENU.find(x => x.id === itemSelect.value); if(!m) return;
+      const topAdd = Number(toppingSelect.value||0);
+      const qty = Math.max(1, Number(qtyInput.value||1));
+      const line = (m.price + topAdd) * qty;
+      priceNow.textContent = `Line: ₹${line}`;
+    }
+
+    itemSelect.addEventListener('change', () => {
+      const m = MENU.find(x => x.id === itemSelect.value);
+      if (!m) { qtyWrap.classList.add('hidden'); topWrap.classList.add('hidden'); addBtn.classList.add('hidden'); priceNow.textContent = ''; return; }
+      toppingSelect.innerHTML = m.tops.map(t => `<option value="${t.add}">${t.name}${t.add?` +₹${t.add}`:''}</option>`).join('');
+      qtyInput.value = 1;
+      qtyWrap.classList.remove('hidden'); topWrap.classList.remove('hidden'); addBtn.classList.remove('hidden');
+      updatePricePreview();
+    });
+
+    toppingSelect.addEventListener('change', updatePricePreview);
+    qtyInput.addEventListener('input', updatePricePreview);
+
+    addBtn.addEventListener('click', () => {
+      const m = MENU.find(x => x.id === itemSelect.value); if(!m) return;
+      const qty = Math.max(1, Number(qtyInput.value||1));
+      const topAdd = Number(toppingSelect.value||0);
+      const topName = toppingSelect.options[toppingSelect.selectedIndex].text;
+      cart.push({ id: crypto.randomUUID(), itemId: m.id, itemName: m.name, qty, basePrice: m.price, toppingName: topName, toppingAdd: topAdd, lineTotal: (m.price + topAdd) * qty });
+      renderCart(); itemSelect.value = ""; qtyWrap.classList.add('hidden'); topWrap.classList.add('hidden'); addBtn.classList.add('hidden'); priceNow.textContent = '';
+    });
+
+    function renderCart(){
+      cartEl.innerHTML = ""; let total = 0;
+      cart.forEach((c) => {
+        total += c.lineTotal;
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.innerHTML = `<div><div><strong>${c.itemName}</strong> × ${c.qty} — ₹${c.lineTotal}</div><div class="cart-meta">${c.toppingName} • Base ₹${c.basePrice} ${c.toppingAdd?`• +₹${c.toppingAdd}`:''}</div></div><button class="rm" data-id="${c.id}">Remove</button>`;
+        cartEl.appendChild(li);
+      });
+      totalPriceEl.textContent = `₹${total}`;
+      cartCountEl.textContent = `(${cart.length} ${cart.length===1?'item':'items'})`;
+      buyNowBtn.disabled = cart.length === 0; clearCartBtn.classList.toggle('hidden', cart.length === 0);
+      cartHint.textContent = cart.length===0 ? "Add items to enable Buy Now." : "Review your cart, then Buy Now.";
+      [...cartEl.querySelectorAll('.rm')].forEach(btn=>{ btn.onclick = () => { cart = cart.filter(x => x.id !== btn.dataset.id); renderCart(); } });
+    }
+
+    clearCartBtn.addEventListener('click', ()=>{ cart = []; renderCart(); });
+    buyNowBtn.addEventListener('click', ()=>{ detailsCard.classList.remove('hidden'); detailsCard.scrollIntoView({behavior:'smooth', block:'start'}); });
+
+    submitOrderBtn.addEventListener('click', async ()=>{
+      statusEl.textContent = "";
+      if (cart.length === 0) { statusEl.textContent = "Cart empty."; setTimeout(() => { statusEl.textContent = ""; }, 4000); return; }
+      const name = nameEl.value.trim(); const phone = phoneEl.value.trim(); const address = addressEl.value.trim();
+      if (!name || !phone || phone.length !== 10 || !address){ statusEl.textContent = "Fill name, 10-digit phone, address."; setTimeout(() => { statusEl.textContent = ""; }, 4000); return; }
+      const total = cart.reduce((s,c)=>s + c.lineTotal, 0);
+
+      submitOrderBtn.disabled = true; submitOrderBtn.textContent = "Submitting…";
+      try{
+        await addDoc(collection(db,"orders"),{ name, phone:"+91"+phone, address, items: cart, total, status:"new", createdAt: serverTimestamp() });
+        statusEl.textContent = "✅ Order placed!"; setTimeout(() => { statusEl.textContent = ""; }, 4000);
+        cart = []; renderCart(); nameEl.value = ""; phoneEl.value=""; addressEl.value=""; detailsCard.classList.add('hidden');
+      }catch(err){ console.error(err); statusEl.textContent = "❌ Failed to save. Check Firestore rules."; setTimeout(() => { statusEl.textContent = ""; }, 4000); }
+      finally{ submitOrderBtn.disabled = false; submitOrderBtn.textContent = "Submit Order ✅"; }
+    });
+
+    // 🔹 Go back button redirect
+    document.getElementById('goBack').addEventListener('click', () => { window.location.href = "https://random.xyz"; });
+
+    renderCart();
+  </script>
+</body>
+</html>
