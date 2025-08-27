@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FFOA - Fresh Food Order App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #333;
+      text-align: center;
+    }
+
+    header {
+      background: #ff5733;
+      color: #fff;
+      padding: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    header span {
+      display: block;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    .hero {
+      padding: 60px 20px;
+      background: linear-gradient(to right, #ffe259, #ffa751);
+      color: #000;
+    }
+
+    .hero h1 {
+      font-size: 40px;
+      margin: 0 0 10px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #444;
+    }
+
+    .features {
+      background: #ffeb3b;
+      margin: 30px auto;
+      padding: 20px;
+      width: 80%;
+      border-radius: 12px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .features span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .features span::before {
+      content: "✅";
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .gallery-item {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+      padding-bottom: 15px;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.05);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-item h3 {
+      margin: 10px 0 5px;
+      font-size: 1.1rem;
+    }
+
+    .price {
+      color: #ff5733;
+      font-weight: bold;
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .order-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff5733;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+
+    .order-btn:hover {
+      background: #e64a19;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    🔥 FFOA  
+    <span>Fresh Food Order App</span>
+  </header>
+
+  <div class="hero">
+    <h1>Delicious Food, Anytime 🍴</h1>
+    <p>Order your favorite meals in just a few clicks.</p>
+  </div>
+
+  <div class="features">
+    <span>Fresh Ingredients</span>
+    <span>Fast Delivery</span>
+    <span>Easy Ordering</span>
+  </div>
+
+  <div class="gallery">
+    <div class="gallery-item">
+      <img src="https://cdn5.vectorstock.com/i/1000x1000/94/24/website-under-construction-internet-404-error-vector-24529424.jpg" alt="Burger">
+      <h3>Product Name TBD</h3>
+      <p class="price">₹120</p>
+    </div>
+    <div class="gallery-item">
+      <img src="https://cdn5.vectorstock.com/i/1000x1000/94/24/website-under-construction-internet-404-error-vector-24529424.jpg" alt="Pizza">
+      <h3>Product Name TBD</h3>
+      <p class="price">₹250</p>
+    </div>
+    <div class="gallery-item">
+      <img src="https://cdn5.vectorstock.com/i/1000x1000/94/24/website-under-construction-internet-404-error-vector-24529424.jpg" alt="Pasta">
+      <h3>Product Name TBD</h3>
+      <p class="price">₹200</p>
+    </div>
+    <div class="gallery-item">
+      <img src="https://cdn5.vectorstock.com/i/1000x1000/94/24/website-under-construction-internet-404-error-vector-24529424.jpg" alt="Salad">
+      <h3>Product Name TBD</h3>
+      <p class="price">₹150</p>
+    </div>
+  </div>
+
+  <button class="order-btn" onclick="window.location.href='index.html'">🛒 Order Now</button>
+</body>
+</html>
